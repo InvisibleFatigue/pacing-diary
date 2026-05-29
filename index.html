@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#F7F3EC">
+  <meta name="description" content="A private, on-device pacing diary for people with ME/CFS. Log activity and symptoms, spot post-exertional malaise patterns, and export summaries for appointments.">
+  <title>Pacing diary — Invisible Fatigue</title>
+
+  <!-- PWA: installable, offline-capable -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+
+  <!-- iOS home-screen app support -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Pacing diary">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wrap">
+      <p class="brandmark">
+        <span class="brand-eyebrow">Invisible Fatigue</span>
+        <span class="brand-title">Pacing diary</span>
+      </p>
+      <p class="brand-note">Private. Your entries are stored only on this device.</p>
+    </div>
+  </header>
+
+  <nav class="primary-nav" aria-label="Sections">
+    <div class="wrap">
+      <ul role="tablist">
+        <li><button type="button" role="tab" aria-selected="true" data-view="today" id="tab-today">Today</button></li>
+        <li><button type="button" role="tab" aria-selected="false" data-view="history" id="tab-history">History</button></li>
+        <li><button type="button" role="tab" aria-selected="false" data-view="patterns" id="tab-patterns">Patterns</button></li>
+        <li><button type="button" role="tab" aria-selected="false" data-view="trends" id="tab-trends">Trends</button></li>
+        <li><button type="button" role="tab" aria-selected="false" data-view="export" id="tab-export">Export</button></li>
+        <li><button type="button" role="tab" aria-selected="false" data-view="about" id="tab-about">About</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main id="main" class="wrap" tabindex="-1">
+
+    <!-- Today / entry view -->
+    <section class="view" data-view="today" aria-labelledby="tab-today">
+      <header class="view-header">
+        <h1>Today's entry</h1>
+        <p class="lede">Log your activity level and how your body and mind feel. There is no right answer. The goal is a steady, honest record over time.</p>
+      </header>
+
+      <form id="entry-form" novalidate>
+        <fieldset class="card">
+          <legend>Date</legend>
+          <label for="entry-date" class="visually-hidden">Entry date</label>
+          <input type="date" id="entry-date" name="date" required>
+          <p class="field-hint" id="date-status" aria-live="polite"></p>
+        </fieldset>
+
+        <fieldset class="card">
+          <legend>Activity</legend>
+
+          <label for="activity-level">
+            Overall activity level today
+            <span class="scale-readout" id="activity-readout">5 — moderate day</span>
+          </label>
+          <input type="range" id="activity-level" name="activityLevel" min="0" max="10" step="1" value="5" aria-describedby="activity-help">
+          <div class="scale-marks" aria-hidden="true">
+            <span>0 bedbound</span><span>5 moderate</span><span>10 over baseline</span>
+          </div>
+          <p id="activity-help" class="field-hint">Include all exertion: physical, cognitive, emotional, sensory, postural. Standing and digesting count.</p>
+
+          <label for="activity-notes">Activities and notes (optional)</label>
+          <textarea id="activity-notes" name="activityNotes" rows="3" placeholder="e.g. Short shower sitting down. 20 min phone call. Walked to kitchen four times."></textarea>
+
+          <label for="upright-hours">Hours upright (optional)</label>
+          <input type="number" id="upright-hours" name="uprightHours" min="0" max="24" step="0.5" inputmode="decimal">
+          <p class="field-hint">Time spent sitting up or standing, rather than reclined or lying flat.</p>
+        </fieldset>
+
+        <fieldset class="card">
+          <legend>Symptoms</legend>
+          <p class="field-hint">Rate each symptom for today. Zero means absent. Ten means severe.</p>
+
+          <div class="symptom-grid">
+            <div class="symptom">
+              <label for="sym-fatigue">Fatigue <span class="scale-readout" id="sym-fatigue-readout">5</span></label>
+              <input type="range" id="sym-fatigue" name="symFatigue" min="0" max="10" step="1" value="5">
+            </div>
+            <div class="symptom">
+              <label for="sym-pem">PEM / crash intensity <span class="scale-readout" id="sym-pem-readout">0</span></label>
+              <input type="range" id="sym-pem" name="symPem" min="0" max="10" step="1" value="0">
+            </div>
+            <div class="symptom">
+              <label for="sym-pain">Pain <span class="scale-readout" id="sym-pain-readout">0</span></label>
+              <input type="range" id="sym-pain" name="symPain" min="0" max="10" step="1" value="0">
+            </div>
+            <div class="symptom">
+              <label for="sym-cognitive">Cognitive (brain fog) <span class="scale-readout" id="sym-cognitive-readout">0</span></label>
+              <input type="range" id="sym-cognitive" name="symCognitive" min="0" max="10" step="1" value="0">
+            </div>
+            <div class="symptom">
+              <label for="sym-orthostatic">Orthostatic (dizziness on standing) <span class="scale-readout" id="sym-orthostatic-readout">0</span></label>
+              <input type="range" id="sym-orthostatic" name="symOrthostatic" min="0" max="10" step="1" value="0">
+            </div>
+            <div class="symptom">
+              <label for="sym-sensory">Sensory sensitivity (light, sound) <span class="scale-readout" id="sym-sensory-readout">0</span></label>
+              <input type="range" id="sym-sensory" name="symSensory" min="0" max="10" step="1" value="0">
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="card">
+          <legend>Sleep</legend>
+          <label for="sleep-hours">Hours of sleep last night</label>
+          <input type="number" id="sleep-hours" name="sleepHours" min="0" max="24" step="0.5" inputmode="decimal">
+
+          <label for="sleep-quality">
+            Sleep quality
+            <span class="scale-readout" id="sleep-quality-readout">5</span>
+          </label>
+          <input type="range" id="sleep-quality" name="sleepQuality" min="0" max="10" step="1" value="5">
+          <div class="scale-marks" aria-hidden="true">
+            <span>0 unrefreshing</span><span>10 deeply restful</span>
+          </div>
+        </fieldset>
+
+        <fieldset class="card">
+          <legend>Optional measurements</legend>
+          <label for="resting-hr">Resting heart rate (bpm)</label>
+          <input type="number" id="resting-hr" name="restingHr" min="30" max="200" step="1" inputmode="numeric">
+          <p class="field-hint">If you track heart rate, a sustained rise of 10+ bpm above your normal resting rate can sometimes indicate a brewing crash.</p>
+        </fieldset>
+
+        <fieldset class="card">
+          <legend>Free notes</legend>
+          <label for="general-notes" class="visually-hidden">General notes</label>
+          <textarea id="general-notes" name="notes" rows="4" placeholder="Anything else worth recording — context, environment, conversations, food, weather, mood."></textarea>
+        </fieldset>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save entry</button>
+          <button type="button" class="btn btn-quiet" id="reset-form">Reset form</button>
+        </div>
+        <p class="save-status" id="save-status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <!-- History view -->
+    <section class="view" data-view="history" hidden aria-labelledby="tab-history">
+      <header class="view-header">
+        <h1>History</h1>
+        <p class="lede">Each square is one day. Darker squares are higher activity. Click any day to view or edit that entry.</p>
+      </header>
+
+      <div class="history-controls">
+        <button type="button" class="btn btn-quiet" id="hist-prev" aria-label="Previous period">←</button>
+        <p class="history-range" id="hist-range" aria-live="polite">—</p>
+        <button type="button" class="btn btn-quiet" id="hist-next" aria-label="Next period">→</button>
+      </div>
+
+      <div id="history-grid" class="history-grid" aria-label="Calendar of entries"></div>
+
+      <div id="history-detail" class="history-detail" hidden></div>
+    </section>
+
+    <!-- Patterns view -->
+    <section class="view" data-view="patterns" hidden aria-labelledby="tab-patterns">
+      <header class="view-header">
+        <h1>PEM patterns</h1>
+        <p class="lede">Post-exertional malaise often follows exertion by 24 to 72 hours. This view looks back from each high-symptom day to see what was happening in the days before. It does not diagnose anything. It surfaces patterns you can think about.</p>
+      </header>
+
+      <div class="pattern-summary card" id="pattern-summary">
+        <p>Log at least a week of entries to start seeing patterns.</p>
+      </div>
+
+      <div id="pattern-events" class="pattern-events"></div>
+    </section>
+
+    <!-- Trends view -->
+    <section class="view" data-view="trends" hidden aria-labelledby="tab-trends">
+      <header class="view-header">
+        <h1>Trends</h1>
+        <p class="lede">Activity, fatigue, and PEM plotted side by side over time. Useful for spotting whether you are drifting outside your envelope, and for sharing context with a GP.</p>
+      </header>
+
+      <div class="trend-controls">
+        <label for="trend-range">Show</label>
+        <select id="trend-range">
+          <option value="14">Last 14 days</option>
+          <option value="30" selected>Last 30 days</option>
+          <option value="90">Last 90 days</option>
+          <option value="365">Last year</option>
+        </select>
+      </div>
+
+      <div id="trend-chart" class="trend-chart" aria-label="Trend chart"></div>
+      <div id="trend-summary" class="trend-summary"></div>
+    </section>
+
+    <!-- Export view -->
+    <section class="view" data-view="export" hidden aria-labelledby="tab-export">
+      <header class="view-header">
+        <h1>Export and backup</h1>
+        <p class="lede">All of your data is stored only in this browser, on this device. Export it whenever you need a copy, want to take it to an appointment, or are switching devices.</p>
+      </header>
+
+      <div class="card">
+        <h2>For an appointment</h2>
+        <p>Generate a one-page PDF summary for a GP, consultant, or specialist clinic.</p>
+        <label for="pdf-range">Period to summarise</label>
+        <select id="pdf-range">
+          <option value="14">Last 14 days</option>
+          <option value="30" selected>Last 30 days</option>
+          <option value="90">Last 90 days</option>
+        </select>
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary" id="btn-pdf">Download PDF summary</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Spreadsheet</h2>
+        <p>Download all of your entries as a CSV file, openable in Numbers, Excel, or Google Sheets.</p>
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary" id="btn-csv">Download CSV</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Backup and restore</h2>
+        <p>A JSON backup contains everything in your diary. Keep it somewhere safe — in your email, in cloud storage, or on a USB stick.</p>
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary" id="btn-backup">Download JSON backup</button>
+          <label for="file-restore" class="btn btn-quiet">Restore from backup
+            <input type="file" id="file-restore" accept="application/json,.json" hidden>
+          </label>
+        </div>
+        <p class="save-status" id="restore-status" aria-live="polite"></p>
+      </div>
+
+      <div class="card card-warning">
+        <h2>Clear all data</h2>
+        <p>Permanently delete every entry on this device. There is no undo. If you might want the data back later, download a backup first.</p>
+        <div class="form-actions">
+          <button type="button" class="btn btn-warning" id="btn-clear">Delete everything</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- About view -->
+    <section class="view" data-view="about" hidden aria-labelledby="tab-about">
+      <header class="view-header">
+        <h1>About this diary</h1>
+      </header>
+
+      <div class="card" id="install-card" hidden>
+        <h2>Install on your phone</h2>
+        <p>Add the diary to your home screen to open it full-screen like an app, and to use it offline — useful for logging from bed with patchy signal.</p>
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary" id="btn-install" hidden>Add to home screen</button>
+        </div>
+        <p class="field-hint" id="install-hint"></p>
+      </div>
+
+      <div class="card">
+        <h2>What this is</h2>
+        <p>A pacing diary for people with ME/CFS. It helps you record activity and symptoms day by day, and look back over weeks and months for patterns you might otherwise miss.</p>
+        <p>Pacing is the central management strategy for ME/CFS. NICE guideline NG206 describes it as staying within an individual's energy limits to avoid triggering post-exertional malaise.</p>
+      </div>
+
+      <div class="card">
+        <h2>How it handles your data</h2>
+        <p>Everything you enter is stored locally in this browser using <code>localStorage</code>. Nothing is sent to a server. There are no accounts, no tracking, and no analytics.</p>
+        <p>Two consequences of this:</p>
+        <ul>
+          <li>If you clear your browser data, the diary clears with it.</li>
+          <li>The diary lives on one device. To move between devices, use the JSON backup and restore in the Export tab.</li>
+        </ul>
+        <p>On phones, browser storage can occasionally be cleared by the operating system when space runs low. If you rely on the diary, download a JSON backup from the Export tab every week or two and keep it somewhere safe.</p>
+      </div>
+
+      <div class="card">
+        <h2>What it is not</h2>
+        <p>This diary is not a diagnostic tool, not a treatment, and not a substitute for medical care. It is a record-keeping aid. Patterns it surfaces are observations, not conclusions.</p>
+        <p>If a sustained change in symptoms is worrying you, speak with your GP or specialist.</p>
+      </div>
+
+      <div class="card">
+        <h2>Credits</h2>
+        <p>Built as a companion tool to <a href="https://invisiblefatigue.com/mecfs/pacing/" rel="noopener">the Invisible Fatigue pacing guide</a>. Open source, no warranty.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>Invisible Fatigue · Pacing diary · <a href="https://invisiblefatigue.com">invisiblefatigue.com</a></p>
+    </div>
+  </footer>
+
+  <!-- jsPDF for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+
+  <script type="module" src="js/app.js"></script>
+
+  <!-- Register the service worker for offline use -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
