@@ -62,7 +62,7 @@ export function deleteEntry(date) {
 
 // ── Hourly activity chart ────────────────────────────────────────
 // Stored separately from entries (keyed by date → array of 24 values:
-// 0 sleep, 1 rest, 2 low, 3 high, or null). Kept out of `entries` on
+// 0 sleep, 1 rest, 2 low, 3 high, 4 medium, or null). Kept out of `entries` on
 // purpose so painted-only days don't skew the activity/symptom averages.
 
 export function getAllHours() {

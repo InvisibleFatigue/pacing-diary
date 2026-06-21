@@ -5,11 +5,15 @@
 
 import { getHours, saveHours } from './storage.js';
 
+// Stored codes are stable: 0 sleep, 1 rest, 2 low, 3 high, 4 medium.
+// Medium was added later as code 4 (not inserted at 3) so existing "high"
+// cells keep their meaning. Array order is the display/brush order.
 const CATS = [
-  { v: 0, label: 'Sleep', color: 'var(--act-sleep)' },
-  { v: 1, label: 'Rest',  color: 'var(--act-rest)'  },
-  { v: 2, label: 'Low',   color: 'var(--act-low)'   },
-  { v: 3, label: 'High',  color: 'var(--act-high)'  },
+  { v: 0, label: 'Sleep',  color: 'var(--act-sleep)'  },
+  { v: 1, label: 'Rest',   color: 'var(--act-rest)'   },
+  { v: 2, label: 'Low',    color: 'var(--act-low)'    },
+  { v: 4, label: 'Medium', color: 'var(--act-medium)' },
+  { v: 3, label: 'High',   color: 'var(--act-high)'   },
 ];
 const ERASE = -1;
 const WD = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -95,10 +99,11 @@ export function renderWeek() {
 }
 
 function updateTally() {
-  const counts = [0, 0, 0, 0];
+  const counts = {};
+  CATS.forEach(c => { counts[c.v] = 0; });
   for (let i = 0; i < 7; i++) {
     const hrs = getHours(isoOf(addDays(weekStart, i)));
-    if (hrs) hrs.forEach(v => { if (v != null && v >= 0 && v < 4) counts[v]++; });
+    if (hrs) hrs.forEach(v => { if (v != null && counts[v] !== undefined) counts[v]++; });
   }
   $('#week-tally').innerHTML = CATS.map(c =>
     `<span class="wk-tally-item"><i style="background:${c.color}"></i>${c.label} ${counts[c.v]}h</span>`

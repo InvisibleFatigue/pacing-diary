@@ -22,10 +22,11 @@
   --warn-tint: #ECD8CE;
 
   /* Activity chart (week view) — cool→warm reads as restful→exerting */
-  --act-sleep: #8E7CC3;        /* dusky violet */
-  --act-rest:  #E7D7A0;        /* soft sand */
-  --act-low:   #A9C08A;        /* sage */
-  --act-high:  #CE7E63;        /* terracotta */
+  --act-sleep:  #8E7CC3;       /* dusky violet */
+  --act-rest:   #E7D7A0;       /* soft sand */
+  --act-low:    #A9C08A;       /* sage */
+  --act-medium: #D9A95C;       /* amber */
+  --act-high:   #CE7E63;       /* terracotta */
 
   --focus: #5A7159;
 
@@ -590,11 +591,12 @@ input[type="range"]:focus-visible::-moz-range-thumb {
 /* Week — hourly activity chart */
 .week-brushes {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
   margin-bottom: var(--space-4);
 }
 .brush {
-  flex: 1;
+  flex: 1 1 90px;
   appearance: none;
   display: flex;
   flex-direction: column;
@@ -671,7 +673,7 @@ input[type="range"]:focus-visible::-moz-range-thumb {
 .wk-cell {
   flex: 1;
   min-width: 0;
-  height: 30px;
+  height: 38px;
   padding: 0;
   border: none;
   border-right: 1px solid var(--border-soft);
@@ -680,6 +682,15 @@ input[type="range"]:focus-visible::-moz-range-thumb {
 }
 .wk-cell:last-child { border-right: none; }
 .wk-cell:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+/* Roomier tap targets on phones (narrow screens) */
+@media (max-width: 36rem) {
+  .wk-cell { height: 50px; }
+  .wk-label, .wk-axis-sp { width: 32px; }
+  .wk-row { margin-bottom: 5px; }
+  /* Reclaim side space so each hour column is a touch wider */
+  [data-view="week"] .card { padding-left: var(--space-3); padding-right: var(--space-3); }
+}
 
 .week-tally {
   display: flex;
