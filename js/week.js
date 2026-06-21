@@ -3,7 +3,7 @@
 // The classic ME/CFS activity-diary view, for spotting the shape of a week
 // at a glance. Hourly data is stored separately from daily entries.
 
-import { getHours, saveHours } from './storage.js';
+import { getHours, saveHours, getSetting, setSetting } from './storage.js';
 
 // Stored codes are stable: 0 sleep, 1 rest, 2 low, 3 high, 4 medium.
 // Medium was added later as code 4 (not inserted at 3) so existing "high"
@@ -23,6 +23,7 @@ const $ = (sel, root = document) => root.querySelector(sel);
 
 let brush = 1;        // default brush: Rest
 let weekStart = null; // Date (UTC midnight) of the displayed Monday
+let dayStart = 7;     // first hour shown (0–10). Hours before this are hidden, not deleted.
 
 // ── Date helpers (mirrors app.js: local "today", UTC for date maths) ──
 function todayIso() {
@@ -68,6 +69,39 @@ function syncBrushes() {
 }
 
 // ── Render ───────────────────────────────────────────────────────
+// The day is shown as two stacked boxes (morning, afternoon/evening) so each
+// box has roughly half the hour-columns and the cells are easier to tap.
+// `dayStart` hides the small hours; data for those hours is kept, just unshown.
+function splitHour() {
+  const span = 24 - dayStart;
+  return dayStart + Math.round(span / 2);
+}
+
+function axisHtml(a, b) {
+  const mid = a + Math.round((b - a + 1) / 2);
+  const ticks = [formatHour(a), formatHour(mid % 24), formatHour((b + 1) % 24)];
+  return `<span class="wk-axis-sp"></span><span class="wk-axis-ticks">${ticks.map(t => `<span>${t}</span>`).join('')}</span>`;
+}
+
+function boxHtml(a, b, today) {
+  let rows = '';
+  for (let i = 0; i < 7; i++) {
+    const d = addDays(weekStart, i);
+    const iso = isoOf(d);
+    const hrs = getHours(iso);
+    const isToday = iso === today;
+    let cells = '';
+    for (let h = a; h <= b; h++) {
+      const v = hrs ? hrs[h] : null;
+      const style = (v == null) ? '' : ` style="background:${catColor(v)}"`;
+      cells += `<button type="button" class="wk-cell" data-date="${iso}" data-h="${h}"${style} aria-label="${WD[i]} ${formatHour(h)}, ${catLabel(v == null ? null : v)}"></button>`;
+    }
+    rows += `<div class="wk-row${isToday ? ' is-today' : ''}"><div class="wk-label">${WD[i]}<span>${d.getUTCDate()}</span></div><div class="wk-cells">${cells}</div></div>`;
+  }
+  const caption = `${formatHour(a)} – ${formatHour((b + 1) % 24)}`;
+  return `<div class="wk-box"><p class="wk-box-cap">${caption}</p><div class="wk-axis">${axisHtml(a, b)}</div>${rows}</div>`;
+}
+
 export function renderWeek() {
   if (!weekStart) weekStart = mondayOf(todayIso());
 
@@ -77,24 +111,8 @@ export function renderWeek() {
   $('#week-next').disabled = weekStart.getTime() >= mondayOf(todayIso()).getTime();
 
   const today = todayIso();
-  let html = '';
-  for (let i = 0; i < 7; i++) {
-    const d = addDays(weekStart, i);
-    const iso = isoOf(d);
-    const hrs = getHours(iso);
-    const isToday = iso === today;
-    let cells = '';
-    for (let h = 0; h < 24; h++) {
-      const v = hrs ? hrs[h] : null;
-      const style = (v == null) ? '' : ` style="background:${catColor(v)}"`;
-      cells += `<button type="button" class="wk-cell" data-date="${iso}" data-h="${h}"${style} aria-label="${WD[i]} ${formatHour(h)}, ${catLabel(v == null ? null : v)}"></button>`;
-    }
-    html += `<div class="wk-row${isToday ? ' is-today' : ''}">
-      <div class="wk-label">${WD[i]}<span>${d.getUTCDate()}</span></div>
-      <div class="wk-cells">${cells}</div>
-    </div>`;
-  }
-  $('#week-grid').innerHTML = html;
+  const mid = splitHour();
+  $('#week-grid').innerHTML = boxHtml(dayStart, mid - 1, today) + boxHtml(mid, 23, today);
   updateTally();
 }
 
@@ -103,7 +121,7 @@ function updateTally() {
   CATS.forEach(c => { counts[c.v] = 0; });
   for (let i = 0; i < 7; i++) {
     const hrs = getHours(isoOf(addDays(weekStart, i)));
-    if (hrs) hrs.forEach(v => { if (v != null && counts[v] !== undefined) counts[v]++; });
+    if (hrs) for (let h = dayStart; h <= 23; h++) { const v = hrs[h]; if (v != null && counts[v] !== undefined) counts[v]++; }
   }
   $('#week-tally').innerHTML = CATS.map(c =>
     `<span class="wk-tally-item"><i style="background:${c.color}"></i>${c.label} ${counts[c.v]}h</span>`
@@ -157,8 +175,26 @@ function clearWeek() {
   renderWeek();
 }
 
+function buildDayStartControl() {
+  const sel = $('#week-start-hour');
+  if (!sel) return;
+  const opts = [
+    { v: 0, label: 'Whole day (12am)' },
+    { v: 5, label: '5am' }, { v: 6, label: '6am' }, { v: 7, label: '7am' },
+    { v: 8, label: '8am' }, { v: 9, label: '9am' }, { v: 10, label: '10am' },
+  ];
+  sel.innerHTML = opts.map(o => `<option value="${o.v}"${o.v === dayStart ? ' selected' : ''}>${o.label}</option>`).join('');
+  sel.addEventListener('change', () => {
+    dayStart = Number(sel.value);
+    setSetting('weekDayStart', dayStart);
+    renderWeek();
+  });
+}
+
 export function initWeek() {
+  dayStart = Number(getSetting('weekDayStart', 7));
   buildBrushes();
+  buildDayStartControl();
   $('#week-prev').addEventListener('click', () => shiftWeek(-7));
   $('#week-next').addEventListener('click', () => shiftWeek(7));
   $('#week-clear').addEventListener('click', clearWeek);

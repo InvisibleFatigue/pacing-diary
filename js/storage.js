@@ -7,15 +7,16 @@ const STORAGE_KEY = 'invisiblefatigue.pacing-diary.v1';
 function read() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { entries: {}, hours: {}, meta: { created: new Date().toISOString() } };
+    if (!raw) return { entries: {}, hours: {}, settings: {}, meta: { created: new Date().toISOString() } };
     const parsed = JSON.parse(raw);
     if (!parsed.entries) parsed.entries = {};
     if (!parsed.hours) parsed.hours = {};
+    if (!parsed.settings) parsed.settings = {};
     if (!parsed.meta) parsed.meta = { created: new Date().toISOString() };
     return parsed;
   } catch (err) {
     console.error('Could not read storage:', err);
-    return { entries: {}, hours: {}, meta: { created: new Date().toISOString() } };
+    return { entries: {}, hours: {}, settings: {}, meta: { created: new Date().toISOString() } };
   }
 }
 
@@ -86,6 +87,19 @@ export function saveHours(date, hours) {
   return write(data);
 }
 
+// ── Settings (small UI preferences, kept with the diary so backups carry them) ──
+export function getSetting(key, fallback) {
+  const settings = read().settings || {};
+  return key in settings ? settings[key] : fallback;
+}
+
+export function setSetting(key, value) {
+  const data = read();
+  if (!data.settings) data.settings = {};
+  data.settings[key] = value;
+  return write(data);
+}
+
 export function exportAll() {
   return read();
 }
@@ -103,6 +117,7 @@ export function importAll(payload) {
     ...current,
     entries: { ...current.entries, ...payload.entries },
     hours: { ...(current.hours || {}), ...(payload.hours || {}) },
+    settings: { ...(current.settings || {}), ...(payload.settings || {}) },
     meta: payload.meta || current.meta,
   };
   return write(merged);

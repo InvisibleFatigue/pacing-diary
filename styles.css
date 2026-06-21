@@ -632,7 +632,30 @@ input[type="range"]:focus-visible::-moz-range-thumb {
     var(--bg-card);
 }
 
+.week-daystart {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin-bottom: var(--space-4);
+  font-family: var(--font-ui);
+}
+.week-daystart label { margin: 0; font-size: 0.9rem; color: var(--ink-quiet); }
+.week-daystart select { width: auto; min-height: 40px; }
+
 .week-grid-wrap { user-select: none; -webkit-user-select: none; }
+
+.wk-box { margin-bottom: var(--space-5); }
+.wk-box:last-child { margin-bottom: 0; }
+.wk-box-cap {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-quiet);
+  margin: 0 0 var(--space-2);
+}
 
 .wk-axis { display: flex; margin-bottom: var(--space-1); }
 .wk-axis-sp { width: 42px; flex: none; }
@@ -673,7 +696,7 @@ input[type="range"]:focus-visible::-moz-range-thumb {
 .wk-cell {
   flex: 1;
   min-width: 0;
-  height: 38px;
+  height: 32px;
   padding: 0;
   border: none;
   border-right: 1px solid var(--border-soft);
@@ -685,7 +708,7 @@ input[type="range"]:focus-visible::-moz-range-thumb {
 
 /* Roomier tap targets on phones (narrow screens) */
 @media (max-width: 36rem) {
-  .wk-cell { height: 50px; }
+  .wk-cell { height: 42px; }
   .wk-label, .wk-axis-sp { width: 32px; }
   .wk-row { margin-bottom: 5px; }
   /* Reclaim side space so each hour column is a touch wider */

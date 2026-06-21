@@ -172,13 +172,12 @@
 
       <div class="card">
         <div class="week-brushes" id="week-brushes" role="group" aria-label="Choose an activity to paint"></div>
-        <div class="week-grid-wrap">
-          <div class="wk-axis" aria-hidden="true">
-            <span class="wk-axis-sp"></span>
-            <span class="wk-axis-ticks"><span>12am</span><span>6am</span><span>12pm</span><span>6pm</span><span>12am</span></span>
-          </div>
-          <div id="week-grid" class="week-grid"></div>
+        <div class="week-daystart">
+          <label for="week-start-hour">Day starts at</label>
+          <select id="week-start-hour"></select>
+          <span class="field-hint" style="margin:0">Hide the small hours for bigger cells.</span>
         </div>
+        <div id="week-grid" class="week-grid-wrap"></div>
         <div class="week-tally" id="week-tally" aria-live="polite"></div>
         <div class="form-actions">
           <button type="button" class="btn btn-quiet" id="week-clear">Clear this week</button>
