@@ -6,6 +6,7 @@ import { saveEntry, getEntry, deleteEntry, importAll, clearAll, getEntriesArray 
 import { detectPemEvents, summarisePatterns } from './patterns.js';
 import { renderTrendChart, renderTrendSummary } from './charts.js';
 import { exportCsv, exportJsonBackup, exportPdfSummary } from './export.js';
+import { initWeek, renderWeek } from './week.js';
 
 // ───────────────────────────────────────────────────────────────
 // Helpers
@@ -44,6 +45,7 @@ function showView(name) {
     b.setAttribute('aria-selected', b.dataset.view === name ? 'true' : 'false');
   });
   // Lazy-render the heavier views on entry
+  if (name === 'week') renderWeek();
   if (name === 'history') renderHistory();
   if (name === 'patterns') renderPatterns();
   if (name === 'trends') renderTrends();
@@ -517,6 +519,7 @@ function init() {
   initRouting();
   bindRangeReadouts();
   bindEntryForm();
+  initWeek();
   bindHistoryNav();
   bindTrends();
   bindExport();

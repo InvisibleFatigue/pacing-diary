@@ -21,6 +21,12 @@
   --warn-strong: #9A5A45;
   --warn-tint: #ECD8CE;
 
+  /* Activity chart (week view) — cool→warm reads as restful→exerting */
+  --act-sleep: #8E7CC3;        /* dusky violet */
+  --act-rest:  #E7D7A0;        /* soft sand */
+  --act-low:   #A9C08A;        /* sage */
+  --act-high:  #CE7E63;        /* terracotta */
+
   --focus: #5A7159;
 
   /* Type */
@@ -580,6 +586,112 @@ input[type="range"]:focus-visible::-moz-range-thumb {
   font-size: 0.85rem;
   color: var(--ink-quiet);
 }
+
+/* Week — hourly activity chart */
+.week-brushes {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+.brush {
+  flex: 1;
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: 52px;
+  padding: var(--space-2) var(--space-1);
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.brush:hover { border-color: var(--ink-quiet); }
+.brush[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: var(--bg-tint);
+  color: var(--ink);
+}
+.brush-sw {
+  width: 22px;
+  height: 13px;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+}
+.brush-sw-erase {
+  background:
+    linear-gradient(45deg, transparent 45%, var(--ink-quiet) 45%, var(--ink-quiet) 55%, transparent 55%),
+    var(--bg-card);
+}
+
+.week-grid-wrap { user-select: none; -webkit-user-select: none; }
+
+.wk-axis { display: flex; margin-bottom: var(--space-1); }
+.wk-axis-sp { width: 42px; flex: none; }
+.wk-axis-ticks {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  color: var(--ink-quiet);
+}
+
+.wk-row { display: flex; align-items: stretch; margin-bottom: 4px; }
+.wk-label {
+  width: 42px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.05;
+}
+.wk-label span { font-weight: 400; font-size: 0.72rem; color: var(--ink-quiet); }
+.wk-row.is-today .wk-label { color: var(--accent-strong); }
+
+.wk-cells {
+  flex: 1;
+  display: flex;
+  touch-action: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.wk-row.is-today .wk-cells { box-shadow: 0 0 0 2px var(--accent-tint); }
+.wk-cell {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-right: 1px solid var(--border-soft);
+  background: var(--bg);
+  cursor: pointer;
+}
+.wk-cell:last-child { border-right: none; }
+.wk-cell:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+.week-tally {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin-top: var(--space-4);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.wk-tally-item { display: inline-flex; align-items: center; gap: var(--space-2); }
+.wk-tally-item i { width: 13px; height: 13px; border-radius: 3px; display: inline-block; }
 
 /* Reduced motion — honour it strictly */
 @media (prefers-reduced-motion: reduce) {

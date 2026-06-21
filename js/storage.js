@@ -7,14 +7,15 @@ const STORAGE_KEY = 'invisiblefatigue.pacing-diary.v1';
 function read() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { entries: {}, meta: { created: new Date().toISOString() } };
+    if (!raw) return { entries: {}, hours: {}, meta: { created: new Date().toISOString() } };
     const parsed = JSON.parse(raw);
     if (!parsed.entries) parsed.entries = {};
+    if (!parsed.hours) parsed.hours = {};
     if (!parsed.meta) parsed.meta = { created: new Date().toISOString() };
     return parsed;
   } catch (err) {
     console.error('Could not read storage:', err);
-    return { entries: {}, meta: { created: new Date().toISOString() } };
+    return { entries: {}, hours: {}, meta: { created: new Date().toISOString() } };
   }
 }
 
@@ -59,6 +60,32 @@ export function deleteEntry(date) {
   return write(data);
 }
 
+// ── Hourly activity chart ────────────────────────────────────────
+// Stored separately from entries (keyed by date → array of 24 values:
+// 0 sleep, 1 rest, 2 low, 3 high, or null). Kept out of `entries` on
+// purpose so painted-only days don't skew the activity/symptom averages.
+
+export function getAllHours() {
+  return read().hours || {};
+}
+
+export function getHours(date) {
+  const hours = read().hours || {};
+  return hours[date] || null;
+}
+
+export function saveHours(date, hours) {
+  const data = read();
+  if (!data.hours) data.hours = {};
+  const hasAny = Array.isArray(hours) && hours.some(v => v !== null && v !== undefined);
+  if (hasAny) {
+    data.hours[date] = hours;
+  } else {
+    delete data.hours[date]; // prune fully-cleared days
+  }
+  return write(data);
+}
+
 export function exportAll() {
   return read();
 }
@@ -75,6 +102,7 @@ export function importAll(payload) {
   const merged = {
     ...current,
     entries: { ...current.entries, ...payload.entries },
+    hours: { ...(current.hours || {}), ...(payload.hours || {}) },
     meta: payload.meta || current.meta,
   };
   return write(merged);

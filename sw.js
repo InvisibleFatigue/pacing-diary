@@ -1,7 +1,7 @@
 // sw.js — offline support for the pacing diary.
 // Bump CACHE when you change any shell file, so phones pick up the update.
 
-const CACHE = 'pacing-diary-v1';
+const CACHE = 'pacing-diary-v2';
 
 const SHELL = [
   './',
@@ -10,6 +10,7 @@ const SHELL = [
   'manifest.webmanifest',
   'js/app.js',
   'js/storage.js',
+  'js/week.js',
   'js/patterns.js',
   'js/charts.js',
   'js/export.js',

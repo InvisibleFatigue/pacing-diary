@@ -41,6 +41,7 @@
     <div class="wrap">
       <ul role="tablist">
         <li><button type="button" role="tab" aria-selected="true" data-view="today" id="tab-today">Today</button></li>
+        <li><button type="button" role="tab" aria-selected="false" data-view="week" id="tab-week">Week</button></li>
         <li><button type="button" role="tab" aria-selected="false" data-view="history" id="tab-history">History</button></li>
         <li><button type="button" role="tab" aria-selected="false" data-view="patterns" id="tab-patterns">Patterns</button></li>
         <li><button type="button" role="tab" aria-selected="false" data-view="trends" id="tab-trends">Trends</button></li>
@@ -154,6 +155,35 @@
         </div>
         <p class="save-status" id="save-status" aria-live="polite"></p>
       </form>
+    </section>
+
+    <!-- Week view — hourly activity chart -->
+    <section class="view" data-view="week" hidden aria-labelledby="tab-week">
+      <header class="view-header">
+        <h1>This week, hour by hour</h1>
+        <p class="lede">The classic pacing chart. Pick an activity, then tap — or drag — across the hours to paint your day. It shows the shape of a week at a glance, so you can see where the heavy patches fall.</p>
+      </header>
+
+      <div class="history-controls">
+        <button type="button" class="btn btn-quiet" id="week-prev" aria-label="Previous week">←</button>
+        <p class="history-range" id="week-range" aria-live="polite">—</p>
+        <button type="button" class="btn btn-quiet" id="week-next" aria-label="Next week">→</button>
+      </div>
+
+      <div class="card">
+        <div class="week-brushes" id="week-brushes" role="group" aria-label="Choose an activity to paint"></div>
+        <div class="week-grid-wrap">
+          <div class="wk-axis" aria-hidden="true">
+            <span class="wk-axis-sp"></span>
+            <span class="wk-axis-ticks"><span>12am</span><span>6am</span><span>12pm</span><span>6pm</span><span>12am</span></span>
+          </div>
+          <div id="week-grid" class="week-grid"></div>
+        </div>
+        <div class="week-tally" id="week-tally" aria-live="polite"></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-quiet" id="week-clear">Clear this week</button>
+        </div>
+      </div>
     </section>
 
     <!-- History view -->
